@@ -87,12 +87,12 @@ end
 - `b_e::Real`: passive recuitment rate of effector cells, default to 0.2;
 - `d_e::Real`: effector cell death rate, default to 0.1;
 - `α_0::Real`: activation coefficient, default to `1e-3`;
-- `β_0::Real`: inhibition coefficient, default to `1e-3`;
-- `γ_0::Real`: escape coefficient, default to `1e-3`;
+- `β_0::Real`: killing coefficient, default to `1e-3`;
+- `γ_0::Real`: inhibition coefficient, default to `1e-3`;
 - `h_α::Real`: activation handling time (by default, the activation rate is type II functional response), default to 1e-2;
 - `fα`: activation rate function, default to `FunctionalResponse.TypeII(α_0, h_α)`, override `α_0` and `h_α`;
-- `fβ`: inhibition rate function, default to `FunctionalResponse.TypeI(β_0)`, override `β_0`;
-- `fγ`: escape rate function, default to `FunctionalResponse.TypeI(γ_0)`, override `γ_0`;
+- `fβ`: killing rate function, default to `FunctionalResponse.TypeI(β_0)`, override `β_0`;
+- `fγ`: inhibition rate function, default to `FunctionalResponse.TypeI(γ_0)`, override `γ_0`;
 
 ##### Mutation Parameters
 
