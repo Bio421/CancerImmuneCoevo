@@ -5,6 +5,8 @@ A lazy vertical concatenation of AbstractVector{T}.
 
 For the case of high mutation rate, each cells may contains a large number of mutations.
 Use this to avoid too many memory allocations and RAM usage.
+
+Another possible solution is use persistent data structure, like `PersistentVector`.
 """
 struct LazyVCat{T,I} <: AbstractVector{T}
     inners::I # any iterable and indexable collection of AbstractVector{T}

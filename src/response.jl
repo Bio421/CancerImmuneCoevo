@@ -1,3 +1,6 @@
+"""
+A module defines the three types of functional response.
+"""
 module FunctionalResponse
 
 abstract type ResponseFunction <: Function end

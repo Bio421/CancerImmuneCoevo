@@ -15,16 +15,23 @@ The value of a substance node is the number of given substance.
 ## Required Methods:
 
 - `Base.getindex(node)`: returns the state of the given `node`;
-- `setval_impl!(node, num)`: raw `setindex!`, used by `setindex!` and `setindex_diff!`;
+- `setval_impl!(node, num)`: raw `setval!` implementation, return a boolean value
+    indicating whether the given `node` is dead;
+- `deriveds(node)`: returns indices of derived nodes in the reaction system;
 
 ## Optional Methods:
 
-- `Base.setindex!(node, num)`: sets the number of given substance `node` to `num`,
+- `setval!(node, num)`: sets the number of given substance `node` to `num`,
     and updates the parent node(s);
-- `setindex_diff!(node, diff)`: incremental version of `Base.setindex!`;
+- `setval_diff!(node, diff)`: incremental version of `setval!`;
 """
 abstract type Substance end
 
+"""
+    setval!(node::Substance, val, rs::NamedTuple)
+
+Set the value of the given `node` to `val`, and update the parent nodes.
+"""
 function setval!(node::Substance, val, rs::NamedTuple)
     orig = node[]
     if setval_impl!(node, val)
@@ -38,6 +45,11 @@ function setval!(node::Substance, val, rs::NamedTuple)
     return node
 end
 
+"""
+    setval_diff!(node::Substance, diff, rs::NamedTuple)
+
+Incrementally set the value of the given `node` by `diff`, and update the parent nodes.
+"""
 function setval_diff!(node::Substance, diff, rs::NamedTuple)
     orig = node[]
     val = apply_impl(orig, diff)
@@ -53,11 +65,23 @@ end
 
 update!(ds::Tuple, node, orig, diff) = foreach(d -> update!(d, node, orig, diff), ds)
 
+"""
+    die!(node::Substance, rs::NamedTuple)
+
+Clean up the given `node` from the reaction system `rs`.
+This function called in `setval!` when `setval_impl!` returns `true`.
+"""
 function die!(node::Substance, rs::NamedTuple)
     foreach_ds(rs, deriveds(node)) do d
         remove_child!(d, node)
     end
 end
+
+"""
+    foreach_ds(f, rs::NamedTuple, ds_ind::NamedTuple{names})
+
+Apply the function `f` to each derived node in the `rs` with the corresponding index in `ds_ind`.
+"""
 @generated function foreach_ds(f, rs::NamedTuple, ds_ind::NamedTuple{names}) where {names}
     ex = Expr(:block)
     for name in names
@@ -66,8 +90,20 @@ end
     return ex
 end
 
+"""
+    diff_impl(orig, val)
+
+Calculate the difference between `val` and `orig`, default to `val - orig`.
+For custom type of `orig` and `val`, this method should be overloaded.
+"""
 diff_impl(orig, val) = val - orig
 
+"""
+    apply_impl(orig, diff)
+
+Apply the difference `diff` to the original value `orig`, default to `orig + diff`.
+For custom type of `orig` and `diff`, this method should be overloaded.
+"""
 apply_impl(val, diff) = val + diff
 
 """
@@ -88,8 +124,11 @@ struct CancerCell{M,D<:NamedTuple} <: Substance
     CancerCell{M,D}(deriveds) where {M,D} = new{M,D}(M(), M(), deriveds)
 end
 
+"Get antigenic mutations of the given `cell`."
 antigenic(cell::CancerCell) = cell.antigenic
+"Get passenger mutations of the given `cell`."
 passenger(cell::CancerCell) = cell.passenger
+"Get all mutations of the given `cell`."
 mutations(cell::CancerCell) = LazyVCat(antigenic(cell), passenger(cell))
 
 deriveds(cell::CancerCell) = cell.deriveds
@@ -117,10 +156,14 @@ mutable struct CLTPopulation{I<:Real,R<:Real,D<:NamedTuple} <: Substance
         new{I,R,D}(zero(I), one(I), i, a, parent)
 end
 
+"Get the number of effector cells of the given `node`."
 e_num(node::CLTPopulation) = node.e_num
+"Get the number of cancer cells recognized by the effector cells of the given `node`."
 c_num(node::CLTPopulation) = node.c_num
 
+"Set the number of effector cells of the given `node`."
 set_e_num!(node::CLTPopulation, e::I) where {I} = node.e_num = e
+"Set the number of cancer cells recognized by the effector cells of the given `node`."
 set_c_num!(node::CLTPopulation, c::I) where {I} = node.c_num = c
 
 immunogenicity(node::CLTPopulation) = node.immunogenicity

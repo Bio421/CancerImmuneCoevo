@@ -32,6 +32,7 @@ end
 
 growend!(v, n) = Base._growend!(v, n)
 
+"Make the cancer cell corresponding to the given reaction node divide."
 function cancer_div!(
     ref::ReactionRef{<:Real,<:CancerCellDivision},
     rs::NamedTuple, # reaction lists
@@ -204,6 +205,7 @@ function cancer_div!(
     return
 end
 
+"Make the cancer cell corresponding to the given reaction node die."
 function cancer_death!(ref::ReactionRef, rs::NamedTuple)
     cancer::CancerCell, effectors = children(ref)
     die!(cancer, rs)
@@ -215,12 +217,14 @@ function cancer_death!(ref::ReactionRef, rs::NamedTuple)
     return
 end
 
+"Make the effector cell corresponding to the given reaction node born."
 function effector_birth!(ref::ReactionRef, rs::NamedTuple)
     effector::CLTPopulation = children(ref)
     setval_diff!(effector, (e = 1,), rs)
     return
 end
 
+"Make the effector cell corresponding to the given reaction node die."
 function effector_death!(ref::ReactionRef, rs::NamedTuple)
     effector::CLTPopulation = children(ref)
     setval_diff!(effector, (e = -1,), rs)
@@ -228,17 +232,6 @@ function effector_death!(ref::ReactionRef, rs::NamedTuple)
 end
 
 """
-    effector_new!(
-        effectors::AbstractVector{<:EffectorCellPopulation},
-        eml::ReactionCons{EM}, edl::ReactionCons{ED},
-        ial::ReactionCons{IA}, iel::ReactionCons{IE},
-        ii::ImmumeInhition,
-        effector_example::EffectorCellPopulation,
-        offset::Integer,
-        rng::Random.AbstractRNG,
-        fi, fa
-    )
-
 Create new effector cells and related reactions for new antigens.
 Fill the `effectors` starting from `offset` with new effector cells,
 and push related reactions to reaction lists `eml`, `edl`, `ial`, `iel`.

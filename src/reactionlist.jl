@@ -3,6 +3,13 @@
 # Compared to normal lists, this data structure is have similar performance
 # for iteration and insertion, but much faster for deletion (we don't need to shift elements).
 
+# EDIT: -----------------------------------------------------------------------
+# For whom want to implement SSA for a similar model:
+# This data structure is suboptimal, a better implementation is just use a simple vector with
+# `swap_deleteat!` function, which deletes an element by swapping it with the last element.
+# We can use swap_deleteat! in our SSA, because the order of reactions does not matter.
+# -----------------------------------------------------------------------------
+
 using DataStructures: SortedSet
 
 """
@@ -253,6 +260,13 @@ function sample(l::ReactionList, r::Real)
         ($(subsum), $(l.sum[]), $(sum(r -> getindex(reaction(r)), l)))"))
 end
 
+"""
+    ReactionRef{T,R,C}
+
+A reference to a reaction in a list of reactions.
+
+The reaction and its children can be accessed by the `reaction` and `children` functions.
+"""
 struct ReactionRef{T,R<:Reaction{T},C}
     list::ReactionList{T,R,C}
     chunk_index::Int
@@ -298,6 +312,11 @@ end
 duplicate(ref::ReactionRef) = duplicate(reaction(ref))
 duplicate_zero(ref::ReactionRef) = duplicate_zero(reaction(ref))
 
+"""
+    ReactionView{T,R,C}
+
+A view of a list of reactions, similar to a list of `ReactionRef`.
+"""
 struct ReactionView{T,R<:Reaction{T},C}
     list::ReactionList{T,R,C}
     indices::Vector{Tuple{Int,Int}}
