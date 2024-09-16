@@ -112,6 +112,8 @@ apply_impl(val, diff) = val + diff
 A node that represents a cancer cell with mutations.
 The mutation type (neoantigen or passenger) is not stored in the node,
 but inferred from related parent reaction nodes.
+
+`antigenic`, `passenger`, and `mutations` is used to get the antigenic mutations.
 """
 struct CancerCell{M,D<:NamedTuple} <: Substance
     passenger::M # passenger mutations
@@ -139,10 +141,12 @@ Base.eltype(::Type{<:CancerCell{T}}) where {T} = T
 Base.getindex(::CancerCell) = 1
 
 """
-    EffectorCellPopulation{I,R,FA,FI,FE} <: Substance
+    CLTPopulation{I,R,FA,FI,FE} <: Substance
 
-A node that represents a population of effector cells,
-carrying the same TCR and can recognize the same antigen.
+A node that represents a population of CLTs, carrying the same TCR and can recognize the same antigen.
+
+`e_num`, `c_num` is used to get the number of effector cells and cancer cells recognized by them.
+`antigenicity` and `immunogenicity` is used to get the antigenicity and immunogenicity of the effector cells.
 """
 mutable struct CLTPopulation{I<:Real,R<:Real,D<:NamedTuple} <: Substance
     e_num::I # number of this type of effector cells

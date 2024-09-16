@@ -29,47 +29,6 @@ end
 The `t` is the current time of the simulation, `epoch` is the current epoch number,
 `reaction_nt` is a named tuple containing the reaction lists of this system.
 
-Here is an example of the callback function to record mutation of each cancer cells
-and number of each type of effector cells:
-
-```julia
-let
-    ts = Float64[]
-    antigenic_mutations = Vector{Int}[]
-    immunogenic_mutations = Vector{Int}[]
-    num_effector_cells = Vector{Int}[]
-
-    ssa() do t, epoch, reaction_nt
-        push!(ts, t)
-
-        antigenic_mutations_epoch = Int[]
-        immunogenic_mutations_epoch = Int[]
-        # each cancer cell division reaction corresponds to an unique cancer cell
-        foreach(reaction_nt.cancer_cell_division) do reaction
-            cancer = children(reaction)[1]
-            # record the number of antigenic and immunogenic mutations
-            # without length to get detailed mutation information
-            push!(antigenic_mutations_epoch, length(antigenic(cancer)))
-            push!(immunogenic_mutations_epoch, length(immunogenic(cancer)))
-        end
-        push!(antigenic_mutations, antigenic_mutations_epoch)
-        push!(immunogenic_mutations, immunogenic_mutations_epoch)
-
-        num_effector_cells_epoch = Int[]
-        # each effector cell migration reaction corresponds to a type of effector cell
-        foreach(reaction_nt.clt_migration) do reaction
-            effector = children(reaction)
-            # record the number of effector cells of each type
-            push!(num_effector_cells_epoch, e_num(effector))
-        end
-        push!(num_effector_cells, num_effector_cells_epoch)
-    end
-
-    # do something with the recorded data
-end
-```
-
-
 ### Keyword Arguments
 
 #### Termination Conditions
